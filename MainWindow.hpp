@@ -30,7 +30,6 @@ protected:
 private:
 	Ui::MainWindow *ui;
 	QLineSeries *m_amplitudes ;
-	const int bufSize = 10000;
 	QVector<QPointF> m_buffer;
 };
 

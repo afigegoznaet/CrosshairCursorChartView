@@ -3,6 +3,8 @@
 #include <QtCharts/QChartGlobal>
 #include <QtCharts/QChartView>
 
+static const int bufSize = 10000;
+
 QT_CHARTS_USE_NAMESPACE
 
 class PointableChartView : public QChartView

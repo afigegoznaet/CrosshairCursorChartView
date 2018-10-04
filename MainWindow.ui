@@ -29,7 +29,7 @@
         <item>
          <widget class="QLineEdit" name="xValLine">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -47,7 +47,7 @@
         <item>
          <widget class="QLineEdit" name="yValLine">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>

@@ -25,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	close all
 	plot(f,g);
 	*/
+
+	ui->xValLine->setReadOnly(true);
+	ui->yValLine->setReadOnly(true);
 	setupGraph();
 	setupCustomChart();
 	connect(ui->pointableChart, &PointableChartView::pointedAt,
@@ -34,8 +37,6 @@ MainWindow::MainWindow(QWidget *parent) :
 			ui->xValLine->setText(QString::number(x*M_PI*2/bufSize));
 			ui->yValLine->setText(QString::number(m_buffer[x].y()));
 		}
-
-
 	});
 }
 
