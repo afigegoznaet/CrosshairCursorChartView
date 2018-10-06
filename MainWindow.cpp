@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	m_amplitudes(new QLineSeries)
 {
 	ui->setupUi(this);
-	//m_amplitudes->setUseOpenGL(true);
+	m_amplitudes->setUseOpenGL(true);
 	/**
 	 *
 	R=1000;
@@ -28,14 +28,27 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	ui->xValLine->setReadOnly(true);
 	ui->yValLine->setReadOnly(true);
+
+	PointableChartView* rcChart = new PointableChartView(this);
+	ui->tabWidget->addTab(rcChart, "RC Chart");
+
 	setupGraph();
-	setupCustomChart();
-	connect(ui->pointableChart, &PointableChartView::pointedAt,
+	setupCustomChart(rcChart);
+
+    //ui->pointableChart->grabMouse();
+    //ui->pointableChart->setUpdatesEnabled(true);
+	connect(rcChart, &PointableChartView::pointedAt,
 			[&](const QPointF &point){
-		int x = point.x();
+        int x = point.x();
 		if(x > 0 && x < bufSize){
 			ui->xValLine->setText(QString::number(x*M_PI*2/bufSize));
 			ui->yValLine->setText(QString::number(m_buffer[x].y()));
+            //update();
+            //repaint();
+            //ui->pointableChart->update();
+            //qApp->processEvents();
+            //this->parentWidget()->repaint();
+            //this->parentWidget()->parentWidget()->repaint();
 		}
 	});
 }
@@ -62,8 +75,8 @@ void MainWindow::setupGraph(){
 	m_amplitudes->replace(m_buffer);
 }
 
-void MainWindow::setupCustomChart(){
-	auto m_chart = ui->pointableChart->chart();
+void MainWindow::setupCustomChart(PointableChartView* rcChart){
+	auto m_chart = rcChart->chart();
 
 
 	//m_amplitudes->setUseOpenGL(true);

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>575</width>
-    <height>411</height>
+    <width>778</width>
+    <height>583</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,6 +31,9 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="text">
+           <string>0</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -49,6 +52,9 @@
           <property name="enabled">
            <bool>true</bool>
           </property>
+          <property name="text">
+           <string>0</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -56,7 +62,11 @@
      </layout>
     </item>
     <item row="1" column="0">
-     <widget class="PointableChartView" name="pointableChart"/>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>-1</number>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -65,8 +75,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>575</width>
-     <height>30</height>
+     <width>778</width>
+     <height>19</height>
     </rect>
    </property>
   </widget>
@@ -81,13 +91,6 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>PointableChartView</class>
-   <extends>QGraphicsView</extends>
-   <header>PointableChartView.hpp</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

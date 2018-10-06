@@ -4,18 +4,20 @@
 
 void PointableChartView::mouseMoveEvent(QMouseEvent *event) {
 	QChartView::mouseMoveEvent(event);
-	//qDebug()<<event->pos();
-	auto point = mapFromGlobal(event->pos());
-	auto pointF = chart()->mapToValue(point,chart()->series().at(0));
+    //qDebug()<<event->pos();
+	pos = mapFromParent(event->pos());
+	pointF = chart()->mapToValue(pos,chart()->series().at(0));
 	emit pointedAt(pointF);
+    //invalidateScene(chart()->plotArea(), QGraphicsScene::ForegroundLayer);
 	update();
+    //repaint();
 }
 
 void PointableChartView::drawForeground(QPainter *painter, const QRectF &rect){
-	QChartView::drawForeground(painter, rect);
+    QChartView::drawForeground(painter, rect);
 
-	auto pos = mapFromGlobal(QCursor::pos());
-	auto pointF = chart()->mapToValue(pos,chart()->series().at(0));
+	//auto pos = mapFromGlobal(QCursor::pos());
+	//auto pointF = chart()->mapToValue(pos,chart()->series().at(0));
 	if(pointF.x()<0 || pointF.x()>= bufSize)
 		return;
 	QRectF SceneRect = chart()->plotArea();

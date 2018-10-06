@@ -15,6 +15,8 @@ namespace Ui {
 	class MainWindow;
 }
 
+class PointableChartView;
+
 class MainWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -24,7 +26,7 @@ public:
 	~MainWindow();
 
 protected:
-	void setupCustomChart();
+    void setupCustomChart(PointableChartView *rcChart);
 	void setupGraph();
 
 private:

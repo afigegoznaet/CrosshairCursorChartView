@@ -20,6 +20,7 @@ signals:
 protected:
 	void mouseMoveEvent(QMouseEvent *event) override;
 	void drawForeground(QPainter *painter, const QRectF &rect) override;
+	QPointF pointF, pos;
 };
 
 #endif // POINTABLECHARTVIEW_HPP

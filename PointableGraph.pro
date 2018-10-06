@@ -25,11 +25,13 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         MainWindow.cpp \
-    PointableChartView.cpp
+    PointableChartView.cpp \
+    GraphTabWidget.cpp
 
 HEADERS += \
         MainWindow.hpp \
-    PointableChartView.hpp
+    PointableChartView.hpp \
+    GraphTabWidget.hpp
 
 FORMS += \
         MainWindow.ui
