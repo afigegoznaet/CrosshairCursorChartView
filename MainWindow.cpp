@@ -11,10 +11,14 @@
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	m_amplitudes(new QLineSeries)
+	linear_chart_amplitudes(new QLineSeries),
+	log_chart_amplitudes(new QLineSeries),
+	logInfo_chart_amplitudes(new QLineSeries)
 {
 	ui->setupUi(this);
-	m_amplitudes->setUseOpenGL(true);
+	linear_chart_amplitudes->setUseOpenGL(true);
+	log_chart_amplitudes->setUseOpenGL(true);
+	logInfo_chart_amplitudes->setUseOpenGL(true);
 	/**
 	 *
 	R=1000;
@@ -29,28 +33,21 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->xValLine->setReadOnly(true);
 	ui->yValLine->setReadOnly(true);
 
-	PointableChartView* rcChart = new PointableChartView(this);
-	ui->tabWidget->addTab(rcChart, "RC Chart");
+	PointableChartView* linearChart = new PointableChartView(linear_chart_buffer, LINEAR, this);
+	PointableChartView* logChart = new PointableChartView(log_chart_buffer, LOGARITHMIC, this);
+	PointableChartView* logInfoChart = new PointableChartView(logInfo_chart_buffer, LOG_INFO, this);
 
-	setupGraph();
-	setupCustomChart(rcChart);
+	ui->tabWidget->addTab(linearChart, "Linear RC Chart");
+	ui->tabWidget->addTab(logChart, "Logarithmic RC Chart");
+	ui->tabWidget->addTab(logInfoChart, "Logarithmic RC Chart with Linear base info");
+
+	setupCustomChart(linearChart, linear_chart_buffer, linear_chart_amplitudes, LINEAR);
+	setupCustomChart(logChart, log_chart_buffer, log_chart_amplitudes, LOGARITHMIC);
+	setupCustomChart(logInfoChart, logInfo_chart_buffer, logInfo_chart_amplitudes, LOG_INFO);
 
     //ui->pointableChart->grabMouse();
     //ui->pointableChart->setUpdatesEnabled(true);
-	connect(rcChart, &PointableChartView::pointedAt,
-			[&](const QPointF &point){
-        int x = point.x();
-		if(x > 0 && x < bufSize){
-			ui->xValLine->setText(QString::number(x*M_PI*2/bufSize));
-			ui->yValLine->setText(QString::number(m_buffer[x].y()));
-            //update();
-            //repaint();
-            //ui->pointableChart->update();
-            //qApp->processEvents();
-            //this->parentWidget()->repaint();
-            //this->parentWidget()->parentWidget()->repaint();
-		}
-	});
+
 }
 
 MainWindow::~MainWindow()
@@ -58,49 +55,67 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-void MainWindow::setupGraph(){
 
-	if (m_buffer.isEmpty()) {
-		m_buffer.reserve(bufSize);
+void MainWindow::setupCustomChart(PointableChartView* rcChart,QVector<QPointF>& buffer, QLineSeries *amplitudes, CHART_TYPE type){
+
+	if (buffer.isEmpty()) {
+		buffer.reserve(bufSize);
 		for (int i = 0; i < bufSize; ++i)
-			m_buffer.append(QPointF(i, 0));
+			buffer.append(QPointF(i, 0));
 	}
-	double inc = M_PI/bufSize;
-	double val = 0;
+	//double inc = M_PI/bufSize;
+	//double val = 0;
 	double R=1000;
 	double C=1e-6;
-	for(int i=0;i<bufSize;i++, val+=inc)
-		m_buffer[i].setY( 1/(1+2.0*i*R*C));
+	for(int i=0;i<bufSize;i++)
+		if(type == LINEAR)
+			buffer[i].setY( 1/(1+2.0*i*M_PI*R*C));
+		else
+			buffer[i].setY( log10( 1/(1+2.0*i*M_PI*R*C)));
 
-	m_amplitudes->replace(m_buffer);
-}
+	amplitudes->replace(buffer);
 
-void MainWindow::setupCustomChart(PointableChartView* rcChart){
 	auto m_chart = rcChart->chart();
 
-
-	//m_amplitudes->setUseOpenGL(true);
-	//m_chart->addSeries(m_amplitudes);
-	QCategoryAxis *axisX = new QCategoryAxis;
-	axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
-	axisX->setRange(0,bufSize);
-
-	axisX->append("0", 0);
-	axisX->append("Pi/2", bufSize/4);
-	axisX->append("Pi", bufSize/2);
-	axisX->append("3*Pi/2", 3*bufSize/4);
-	axisX->append("2*Pi", bufSize);
-
+	QValueAxis *axisX = new QValueAxis;
+	axisX->setRange(0, 10000);
 
 	axisX->setLabelFormat("%g");
 	axisX->setTitleText("Phase");
 	QValueAxis *axisY = new QValueAxis;
-	axisY->setRange(0, 1.0);
+
+	double logRange = log10( 1/(1+2.0*9999*M_PI*R*C));
+
+	switch (type) {
+		case LOGARITHMIC:
+			m_chart->setTitle("Logarithmic RC response" );
+			axisY->setRange(logRange, 0);
+			rcChart->setMaxRange(logRange);
+			break;
+		case LOG_INFO:
+			m_chart->setTitle("Logarithmic with linear info RC response" );
+			axisY->setRange(logRange, 0);
+			rcChart->setMaxRange(logRange);
+			break;
+		default:
+			m_chart->setTitle("Linear RC response" );
+			axisY->setRange(0, 1.0);
+	}
+
 	axisY->setTitleText("Gain");
-	m_chart->addSeries(m_amplitudes);
-	m_chart->setAxisX(axisX, m_amplitudes);
-	m_chart->setAxisY(axisY, m_amplitudes);
+	m_chart->addSeries(amplitudes);
+	m_chart->setAxisX(axisX, amplitudes);
+	m_chart->setAxisY(axisY, amplitudes);
 	m_chart->legend()->hide();
-	m_chart->setTitle("RC response" );
+
+
+	connect(rcChart, &PointableChartView::pointedAt,
+			[&](const QPointF &point){
+		int x = static_cast<int>(point.x());
+		if(x > -1 && x < bufSize){
+			ui->xValLine->setText(QString::number(x));
+			ui->yValLine->setText(QString::number(buffer[x].y()));
+		}
+	});
 
 }

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QtCharts/QChartGlobal>
+#include "PointableChartView.hpp"
 
 QT_CHARTS_BEGIN_NAMESPACE
 class QChart;
@@ -15,7 +16,7 @@ namespace Ui {
 	class MainWindow;
 }
 
-class PointableChartView;
+
 
 class MainWindow : public QMainWindow
 {
@@ -26,13 +27,12 @@ public:
 	~MainWindow();
 
 protected:
-    void setupCustomChart(PointableChartView *rcChart);
-	void setupGraph();
+	void setupCustomChart(PointableChartView *rcChart, QVector<QPointF>& buffer, QLineSeries * amplitudes, CHART_TYPE type);
 
 private:
 	Ui::MainWindow *ui;
-	QLineSeries *m_amplitudes ;
-	QVector<QPointF> m_buffer;
+	QLineSeries *linear_chart_amplitudes, *log_chart_amplitudes, *logInfo_chart_amplitudes;
+	QVector<QPointF> linear_chart_buffer, log_chart_buffer, logInfo_chart_buffer;
 };
 
 #endif // MAINWINDOW_HPP
