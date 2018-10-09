@@ -11,14 +11,15 @@
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
 	ui(new Ui::MainWindow),
-	linear_chart_amplitudes(new QLineSeries),
-	log_chart_amplitudes(new QLineSeries),
-	logInfo_chart_amplitudes(new QLineSeries)
+	linearLinearAmplitudes(new QLineSeries),
+	linearXLogYAmplitudes(new QLineSeries),
+	logXLinearYAmplitudes(new QLineSeries),
+	logXLogYAmplitudes(new QLineSeries)
 {
 	ui->setupUi(this);
-	linear_chart_amplitudes->setUseOpenGL(true);
-	log_chart_amplitudes->setUseOpenGL(true);
-	logInfo_chart_amplitudes->setUseOpenGL(true);
+	linearLinearAmplitudes->setUseOpenGL(true);
+	linearXLogYAmplitudes->setUseOpenGL(true);
+	logXLinearYAmplitudes->setUseOpenGL(true);
 	/**
 	 *
 	R=1000;
@@ -33,17 +34,18 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->xValLine->setReadOnly(true);
 	ui->yValLine->setReadOnly(true);
 
-	PointableChartView* linearChart = new PointableChartView(linear_chart_buffer, LINEAR, this);
-	PointableChartView* logChart = new PointableChartView(log_chart_buffer, LOGARITHMIC, this);
-	PointableChartView* logInfoChart = new PointableChartView(logInfo_chart_buffer, LOG_INFO, this);
+	PointableChartView* linearLinearChart = new PointableChartView(linearLinearChartBuffer, LINEAR, this);
+	PointableChartView* logChart = new PointableChartView(linearXLogYBuffer, LOGY, this);
+	//PointableChartView* logInfoChart = new PointableChartView(logInfo_chart_buffer, LOG_INFO, this);
 
-	ui->tabWidget->addTab(linearChart, "Linear RC Chart");
-	ui->tabWidget->addTab(logChart, "Logarithmic RC Chart");
-	ui->tabWidget->addTab(logInfoChart, "Logarithmic RC Chart with Linear base info");
+	ui->tabWidget->addTab(linearLinearChart, "Linear - Linear");
+	ui->tabWidget->addTab(logChart, "Linear X - Log10 Y");
+	//ui->tabWidget->addTab(logChart, "Log10 X - Linear Y");
+	//ui->tabWidget->addTab(logInfoChart, "Log10 X - Log10 Y");
 
-	setupCustomChart(linearChart, linear_chart_buffer, linear_chart_amplitudes, LINEAR);
-	setupCustomChart(logChart, log_chart_buffer, log_chart_amplitudes, LOGARITHMIC);
-	setupCustomChart(logInfoChart, logInfo_chart_buffer, logInfo_chart_amplitudes, LOG_INFO);
+	setupCustomChart(linearLinearChart, linearLinearChartBuffer, linearLinearAmplitudes, LINEAR);
+	setupCustomChart(logChart, linearXLogYBuffer, linearXLogYAmplitudes, LOGY);
+	//setupCustomChart(logInfoChart, logInfo_chart_buffer, logInfo_chart_amplitudes, LOG_INFO);
 
     //ui->pointableChart->grabMouse();
     //ui->pointableChart->setUpdatesEnabled(true);
@@ -87,12 +89,17 @@ void MainWindow::setupCustomChart(PointableChartView* rcChart,QVector<QPointF>& 
 	double logRange = log10( 1/(1+2.0*9999*M_PI*R*C));
 
 	switch (type) {
-		case LOGARITHMIC:
+		case LOGY:
 			m_chart->setTitle("Logarithmic RC response" );
 			axisY->setRange(logRange, 0);
 			rcChart->setMaxRange(logRange);
 			break;
-		case LOG_INFO:
+		case LOGX:
+			m_chart->setTitle("Logarithmic with linear info RC response" );
+			axisY->setRange(logRange, 0);
+			rcChart->setMaxRange(logRange);
+			break;
+		case LOGX_LOGY:
 			m_chart->setTitle("Logarithmic with linear info RC response" );
 			axisY->setRange(logRange, 0);
 			rcChart->setMaxRange(logRange);

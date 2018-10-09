@@ -31,8 +31,8 @@ protected:
 
 private:
 	Ui::MainWindow *ui;
-	QLineSeries *linear_chart_amplitudes, *log_chart_amplitudes, *logInfo_chart_amplitudes;
-	QVector<QPointF> linear_chart_buffer, log_chart_buffer, logInfo_chart_buffer;
+	QLineSeries *linearLinearAmplitudes, *linearXLogYAmplitudes, *logXLinearYAmplitudes, *logXLogYAmplitudes;
+	QVector<QPointF> linearLinearChartBuffer, linearXLogYBuffer, logXLinearYBuffer, logXLogYBuffer;
 };
 
 #endif // MAINWINDOW_HPP

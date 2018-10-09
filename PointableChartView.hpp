@@ -7,7 +7,7 @@ static const int bufSize = 10000;
 
 QT_CHARTS_USE_NAMESPACE
 
-enum CHART_TYPE{LINEAR, LOGARITHMIC, LOG_INFO};
+enum CHART_TYPE{LINEAR, LOGY, LOGX, LOGX_LOGY};
 
 class PointableChartView : public QChartView
 {
