@@ -26,21 +26,22 @@ void PointableChartView::drawForeground(QPainter *painter, const QRectF &rect){
 	double y;
 	auto val = m_buffer[pointF.x()].y();
 
-	if(maxRange<0)
-		y = SceneRect.top()+(1-(maxRange - val)/maxRange) * SceneRect.height();
+	//if(LINEAR != m_type)
+		//val = log10(val);
+	if(LOGX_LOGY == m_type || LOGY == m_type)
+		y = SceneRect.top()+( ( log10(val))/maxRange) * SceneRect.height();
 	else
 		y = SceneRect.top()+( maxRange - val ) * SceneRect.height();
 
-	qDebug()<<val;
-	qDebug()<<y;
+	//qDebug()<<val;
+	//qDebug()<<y;
 
 	painter->drawLine(SceneRect.left(), y, SceneRect.right(), y);
 	painter->drawLine(pos.x(), SceneRect.top(), pos.x(), SceneRect.bottom());
 
 
 	//auto val = m_buffer[pointF.x()].y();
-	if(LINEAR != m_type)
-		val = pow(10, val);
+
 	painter->drawText( SceneRect.left(), y, QString::number(val));
 
 }

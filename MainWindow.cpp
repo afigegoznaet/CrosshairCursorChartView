@@ -4,8 +4,8 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QChart>
 #include <QtCharts/QValueAxis>
+#include <QtCharts/QLogValueAxis>
 #include <QtCharts/QCategoryAxis>
-#include <QtMath>
 #include "PointableChartView.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -35,17 +35,19 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->yValLine->setReadOnly(true);
 
 	PointableChartView* linearLinearChart = new PointableChartView(linearLinearChartBuffer, LINEAR, this);
-	PointableChartView* logChart = new PointableChartView(linearXLogYBuffer, LOGY, this);
-	//PointableChartView* logInfoChart = new PointableChartView(logInfo_chart_buffer, LOG_INFO, this);
+	PointableChartView* linearXLogYChart = new PointableChartView(linearXLogYBuffer, LOGY, this);
+	PointableChartView* logXLinearYChart = new PointableChartView(logXLinearYBuffer, LOGX, this);
+	PointableChartView* logXLogYChart = new PointableChartView(logXLogYBuffer, LOGX_LOGY, this);
 
 	ui->tabWidget->addTab(linearLinearChart, "Linear - Linear");
-	ui->tabWidget->addTab(logChart, "Linear X - Log10 Y");
-	//ui->tabWidget->addTab(logChart, "Log10 X - Linear Y");
-	//ui->tabWidget->addTab(logInfoChart, "Log10 X - Log10 Y");
+	ui->tabWidget->addTab(linearXLogYChart, "Linear X - Log10 Y");
+	ui->tabWidget->addTab(logXLinearYChart, "Log10 X - Linear Y");
+	ui->tabWidget->addTab(logXLogYChart, "Log10 X - Log10 Y");
 
 	setupCustomChart(linearLinearChart, linearLinearChartBuffer, linearLinearAmplitudes, LINEAR);
-	setupCustomChart(logChart, linearXLogYBuffer, linearXLogYAmplitudes, LOGY);
-	//setupCustomChart(logInfoChart, logInfo_chart_buffer, logInfo_chart_amplitudes, LOG_INFO);
+	setupCustomChart(linearXLogYChart, linearXLogYBuffer, linearXLogYAmplitudes, LOGY);
+	setupCustomChart(logXLinearYChart, logXLinearYBuffer, logXLinearYAmplitudes, LOGX);
+	setupCustomChart(logXLogYChart, logXLogYBuffer, logXLogYAmplitudes, LOGX_LOGY);
 
     //ui->pointableChart->grabMouse();
     //ui->pointableChart->setUpdatesEnabled(true);
@@ -60,61 +62,85 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupCustomChart(PointableChartView* rcChart,QVector<QPointF>& buffer, QLineSeries *amplitudes, CHART_TYPE type){
 
-	if (buffer.isEmpty()) {
-		buffer.reserve(bufSize);
-		for (int i = 0; i < bufSize; ++i)
-			buffer.append(QPointF(i, 0));
-	}
-	//double inc = M_PI/bufSize;
-	//double val = 0;
 	double R=1000;
 	double C=1e-6;
-	for(int i=0;i<bufSize;i++)
-		if(type == LINEAR)
-			buffer[i].setY( 1/(1+2.0*i*M_PI*R*C));
-		else
-			buffer[i].setY( log10( 1/(1+2.0*i*M_PI*R*C)));
+	if (buffer.isEmpty()) {
+		buffer.reserve(bufSize);
+		for (int i = 1; i <= bufSize; ++i)
+			//if(type == LINEAR || type == LOGY)
+				buffer.append(QPointF(i, 1/(1+2.0*i*M_PI*R*C)));
+			//else
+				//buffer.append(QPointF(log10(i), 0));
+	}
+
+	//double inc = M_PI/bufSize;
+	//double val = 0;
+
+	//for(int i=0;i<bufSize;i++)
+		//if(type == LINEAR || type == LOGY)
+			//buffer[i].setY( 1/(1+2.0*(i+1)*M_PI*R*C));
+		//else
+			//buffer[i].setY( log10( 1/(1+2.0*log10(i)*M_PI*R*C)));
+
 
 	amplitudes->replace(buffer);
 
 	auto m_chart = rcChart->chart();
 
 	QValueAxis *axisX = new QValueAxis;
-	axisX->setRange(0, 10000);
+	QLogValueAxis *logAxisX = new QLogValueAxis;
+	axisX->setRange(1, 10000);
+	logAxisX->setRange(1, 10000);
 
 	axisX->setLabelFormat("%g");
+	logAxisX->setLabelFormat("%g");
 	axisX->setTitleText("Phase");
-	QValueAxis *axisY = new QValueAxis;
+	logAxisX->setTitleText("Phase");
+	axisX->setMinorTickCount(-1);
+	logAxisX->setMinorTickCount(-1);
 
-	double logRange = log10( 1/(1+2.0*9999*M_PI*R*C));
+	QValueAxis *axisY = new QValueAxis;
+	QLogValueAxis *logAxisY = new QLogValueAxis;
+	axisY->setTitleText("Gain");
+	logAxisY->setTitleText("Gain");
+	logAxisY->setBase(10);
+
+	double logRange = 0.011;//log10( 1/(1+2.0*9999*M_PI*R*C));
+	axisY->setRange(0, 1.0);
+	logAxisY->setRange(0.011, 1.0);
+	logAxisY->setMinorTickCount(-1);
+
+	//logAxisY->setMin(0.01);
+	//logAxisY->setMax(1);
+
+	m_chart->addSeries(amplitudes);
 
 	switch (type) {
 		case LOGY:
-			m_chart->setTitle("Logarithmic RC response" );
-			axisY->setRange(logRange, 0);
-			rcChart->setMaxRange(logRange);
+			m_chart->setTitle("Linear X - Linear Y" );
+			rcChart->setMaxRange(log10(logRange));
+			m_chart->setAxisX(axisX, amplitudes);
+			m_chart->setAxisY(logAxisY, amplitudes);
 			break;
 		case LOGX:
-			m_chart->setTitle("Logarithmic with linear info RC response" );
-			axisY->setRange(logRange, 0);
-			rcChart->setMaxRange(logRange);
+			m_chart->setTitle("Linear X - Log10 Y" );
+			//rcChart->setMaxRange(logRange);
+			m_chart->setAxisX(logAxisX, amplitudes);
+			m_chart->setAxisY(axisY, amplitudes);
 			break;
 		case LOGX_LOGY:
-			m_chart->setTitle("Logarithmic with linear info RC response" );
-			axisY->setRange(logRange, 0);
-			rcChart->setMaxRange(logRange);
+			m_chart->setTitle("Log10 X - Linear Y" );
+			rcChart->setMaxRange(log10(logRange));
+			m_chart->setAxisX(logAxisX, amplitudes);
+			m_chart->setAxisY(logAxisY, amplitudes);
 			break;
 		default:
-			m_chart->setTitle("Linear RC response" );
-			axisY->setRange(0, 1.0);
+			m_chart->setTitle("Log10 X - Log10 Y" );
+			m_chart->setAxisX(axisX, amplitudes);
+			m_chart->setAxisY(axisY, amplitudes);
 	}
 
-	axisY->setTitleText("Gain");
-	m_chart->addSeries(amplitudes);
-	m_chart->setAxisX(axisX, amplitudes);
-	m_chart->setAxisY(axisY, amplitudes);
 	m_chart->legend()->hide();
-
 
 	connect(rcChart, &PointableChartView::pointedAt,
 			[&](const QPointF &point){

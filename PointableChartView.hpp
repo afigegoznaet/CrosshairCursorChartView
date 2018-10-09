@@ -2,7 +2,7 @@
 #define POINTABLECHARTVIEW_HPP
 #include <QtCharts/QChartGlobal>
 #include <QtCharts/QChartView>
-
+#include <QtMath>
 static const int bufSize = 10000;
 
 QT_CHARTS_USE_NAMESPACE
